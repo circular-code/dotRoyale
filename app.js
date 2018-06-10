@@ -1,36 +1,58 @@
-function sketchProc(processing) {
-  // Override draw function, by default it will be called 60 times per second
-  processing.draw = function() {
-    // determine center and max clock arm length
-    var centerX = processing.width / 2, centerY = processing.height / 2;
-    var maxArmLength = Math.min(centerX, centerY);
+"use strict";
+/* jshint -W117 */
+/* jshint -W098 */
 
-    function drawArm(position, lengthScale, weight) {
-      processing.strokeWeight(weight);
-       processing.line(centerX, centerY,
-         centerX + Math.sin(position * 2 * Math.PI) * lengthScale * maxArmLength,
-         centerY - Math.cos(position * 2 * Math.PI) * lengthScale * maxArmLength);
-     }
- 
-     // erase background
-     processing.background(224);
- 
-     var now = new Date();
- 
-     // Moving hours arm by small increments
-     var hoursPosition = (now.getHours() % 12 + now.getMinutes() / 60) / 12;
-     drawArm(hoursPosition, 0.5, 5);
- 
-     // Moving minutes arm by small increments
-     var minutesPosition = (now.getMinutes() + now.getSeconds() / 60) / 60;
-     drawArm(minutesPosition, 0.80, 3);
- 
-     // Moving hour arm by second increments
-     var secondsPosition = now.getSeconds() / 60;
-     drawArm(secondsPosition, 0.90, 1);
-   };
- }
- 
- var canvas = document.getElementById("canvas1");
- // attaching the sketchProc function to the canvas
- var processingInstance = new Processing(canvas, sketchProc);
+var global = {
+  data: []
+};
+
+function DataConstructor (speed, width, color) {
+  this.xPos = window.innerWidth / random(1,5);
+  this.xDir = this.yDir = 1;
+  this.yPos = window.innerHeight / random(1,5);
+  this.speed = speed;
+  this.width = width;
+  this.radius = width / 2;
+  this.color = color;
+}
+
+function setup() {
+  createCanvas(window.innerWidth, window.innerHeight);
+}
+
+setInterval(pushDataConstructor, 1000);
+
+function pushDataConstructor() {
+  global.data.push(new DataConstructor(random(5,15), random(10,50), 'rgba(' + floor(random(0,256)) + ',' + floor(random(0,256)) + ',' + floor(random(0,256)) + ',100)'));
+}
+
+function draw() {
+
+  background('#000000');
+
+  global.data.forEach(function(d) {
+    fill(d.color);
+    ellipse(determinePos(d.xPos, d.xDir, window.innerWidth, 'x', d), determinePos(d.yPos, d.yDir, window.innerHeight, 'y', d), d.width, d.width);
+  });
+}
+
+function rNumBetw (max, min) {
+  if (typeof max === 'undefined'){
+      console.log('max undefined');
+      return false;
+  }
+  if (typeof min === 'undefined'){
+      min = 0;
+  }
+  return Math.floor(Math.random()*(max-min)+min);
+}
+
+function determinePos (pos, direction, distance, axis, d) {
+
+  d[axis + 'Dir'] = pos >= distance - d.radius ? direction = -1 :
+                    pos <= 0 + d.radius ? direction = 1 :
+                    direction;
+
+  d[axis + 'Pos'] = pos += direction * d.speed;
+  return pos;
+}
