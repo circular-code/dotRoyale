@@ -3,7 +3,8 @@
 /* jshint -W098 */
 
 var global = {
-  dots: []
+  dots: [],
+  counter: 0
 };
 
 function Dot (speed, width, color) {
@@ -18,8 +19,10 @@ function Dot (speed, width, color) {
 }
 
 function pushDots() {
-  if (global.dots.length < 100)
-    global.dots.push(new Dot(random(3,7), random(10,20), 'rgba(' + floor(random(0,256)) + ',' + floor(random(0,256)) + ',' + floor(random(0,256)) + ',100)'));
+  if (global.counter < 100) {
+    global.dots.push(new Dot(random(3,5), random(5,10), 'rgba(' + floor(random(0,256)) + ',' + floor(random(0,256)) + ',' + floor(random(0,256)) + ',100)'));
+    global.counter++;
+  }
 }
 
 function determinePos (pos, direction, distance, axis, d) {
@@ -89,4 +92,4 @@ function draw() {
   });
 }
 
-setInterval(pushDots, 300);
+setInterval(pushDots, 100);
