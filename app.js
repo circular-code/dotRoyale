@@ -18,8 +18,8 @@ function Dot (speed, width, color) {
 }
 
 function pushDots() {
-  if (global.dots.length < 20)
-    global.dots.push(new Dot(random(3,7), random(20,50), 'rgba(' + floor(random(0,256)) + ',' + floor(random(0,256)) + ',' + floor(random(0,256)) + ',100)'));
+  if (global.dots.length < 100)
+    global.dots.push(new Dot(random(3,7), random(10,20), 'rgba(' + floor(random(0,256)) + ',' + floor(random(0,256)) + ',' + floor(random(0,256)) + ',100)'));
 }
 
 function determinePos (pos, direction, distance, axis, d) {
@@ -34,34 +34,35 @@ function determinePos (pos, direction, distance, axis, d) {
 
 function checkCollision(d) {
   var collidedDots = global.dots.filter(function(dot) {
-    return d !== dot && dist(d.x, d.y, dot.x, dot.y) <= d.radius + dot.radius;
+    return d !== dot && dot.destroyed === false && dist(d.x, d.y, dot.x, dot.y) <= d.radius + dot.radius;
   });
 
   if (collidedDots.length > 0)
     return collidedDots;
 }
 
-// function absorb(dots, mainDot) {
+function absorb(dots, mainDot) {
 
-//   dots.push(mainDot);
+  dots.push(mainDot);
 
-//   var radius = 0;
-//   var index = 0;
+  var radius = 0;
+  var index = 0;
 
-//   for (var i = 0; i < dots.length; i++) {
-//     if (dots[i].radius > radius) {
-//       radius = dots[i].radius;
-//       index = i;
-//     }
-//   }
+  for (var i = 0; i < dots.length; i++) {
+    if (dots[i].radius > dots[index].radius) {
+      index = i;
+    }
+    radius += dots[i].radius;
+  }
 
-//   for (var k = 0; k < dots.length; k++) {
-//     if (dots.length[k] !== dots[index]) {
-//       dots[k].destroyed = true;
-//       global.dots[global.dots.indexOf(dots[k])].destroyed = true;
-//     }
-//   }
-// }
+  for (var k = 0; k < dots.length; k++) {
+    if (dots[k] !== dots[index])
+      dots[k].destroyed = true;
+  }
+
+  dots[index].radius = radius;
+  dots[index].width = radius * 2;
+}
 
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
@@ -73,19 +74,19 @@ function draw() {
 
   global.dots.forEach(function(d) {
 
+    if (d.destroyed)
+      return;
+
     var collidedDots = checkCollision(d);
 
     if (collidedDots)
-      // absorb(collidedDots, d);
-      fill('red');
+      absorb(collidedDots, d);
     else
       fill(d.color);
 
-    // if (d.destroyed)
-    //   return;
-
-    ellipse(determinePos(d.x, d.xDir, window.innerWidth, 'x', d), determinePos(d.y, d.yDir, window.innerHeight, 'y', d), d.width);
+    if (!d.destroyed)
+      ellipse(determinePos(d.x, d.xDir, window.innerWidth, 'x', d), determinePos(d.y, d.yDir, window.innerHeight, 'y', d), d.width);
   });
 }
 
-setInterval(pushDots, 1000);
+setInterval(pushDots, 300);
