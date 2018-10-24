@@ -93,3 +93,5 @@ function draw() {
 }
 
 setInterval(pushDots, 100);
+
+// TODO: prevent flickering
